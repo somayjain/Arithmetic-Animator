@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- TemplateBeginEditable name="doctitle" -->
+<title>Select - Illustration</title>
+<style>
+#nav2
+{
+	width: 355px;
+	height: 75px;
+	border: 1px solid block;
+	margin: 100px;
+	position: relative;
+	background-color: #FF0066;
+}
+#btn_8X7, #btn_8X6, #btn_9X6, #btn_8X9
+{
+	display:inline-block;
+	padding:3px 8px;
+	color: transparent;
+	font-family:sans-serif;
+	font-weight:bold;
+	font-size:100%;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10;
+}
+#txt_8x7, #txt_8x6, #txt_9x6, #txt_8x9
+{
+	display:inline-block;
+	padding:3px 8px;
+	background-color:#f30;
+	color: black;
+	font-family:sans-serif;
+	font-weight:bold;
+	font-size:100%;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10;
+}
+#btn_8X7
+{
+	position:absolute;
+	left:25px;
+	top:25px;
+	z-index:1;
+}
+#txt_8x7
+{
+	position:absolute;
+	left:25px;
+	top:25px;
+	z-index:0;
+}
+#btn_8X6
+{
+	position:absolute;
+	left:100px;
+	top:25px;
+	z-index:1;
+}
+#txt_8x6
+{
+	position:absolute;
+	left:100px;
+	top:25px;
+	z-index:0;
+}
+#btn_9X6
+{
+	position:absolute;
+	left:175px;
+	top:25px;
+	z-index:1;
+}
+#txt_9x6
+{
+	position:absolute;
+	left:175px;
+	top:25px;
+	z-index:0;
+}
+#btn_8X9
+{
+	position:absolute;
+	left:256px;
+	top:25px;
+	z-index:1;
+}
+#txt_8x9
+{
+	position:absolute;
+	left:256px;
+	top:25px;
+	z-index:0;
+}
+</style>
+
+<!--Adobe Edge Runtime-->
+    <script type="text/javascript" charset="utf-8" src="select_edgePreload.js"></script>
+    <style>
+        .edgeLoad-EDGE-1914995 { visibility:hidden; }
+        img { display: block; }
+    </style>
+<!--Adobe Edge Runtime End-->
+
+</head>
+<body>
+<div style="width: 928px; margin: 0 auto; position: relative; font-family: Tahoma, Geneva, sans-serif; font-weight: bold; text-align: center; font-size: xx-large; color: #F00;" class="edgeLoad-EDGE-1914995">Select Illustration
+  <div id="nav2" class="edgeLoad-EDGE-1914995">
+  <div id="btn_8X7" class="edgeLoad-EDGE-1914995">8x7</div>
+  <div id="txt_8x7" class="edgeLoad-EDGE-1914995">8x7</div>
+  <div id="btn_8X6" class="edgeLoad-EDGE-1914995">8x6</div>
+  <div id="txt_8x6" class="edgeLoad-EDGE-1914995">8x6</div>
+  <div id="btn_9X6" class="edgeLoad-EDGE-1914995">9x6</div>
+  <div id="txt_9x6" class="edgeLoad-EDGE-1914995">9x6</div>
+  <div id="btn_8X9" class="edgeLoad-EDGE-1914995">8x9</div>
+  <div id="txt_8x9" class="edgeLoad-EDGE-1914995">8x9</div>
+</div>
+</div>
+</body>
+</html>
