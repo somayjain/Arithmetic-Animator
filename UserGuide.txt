@@ -1,0 +1,12 @@
+﻿ USER-GUIDE
+As soon as you open index.html you are asked to select between the illustration and exercise.
+Then you choose a animation which can be changed later.
+Then you are prompted to selected among the multiplications in the list.
+In illustration by clicking “Next” button the next step is shown with a voice in the background.
+The “Undo” button takes you to the previous step.
+If exercise was chosen earlier, you are redirected to the exercise page. 
+You have to do some of the things manually in the exercise part. Such as selecteing which row or column is to be transposed etc. 
+An “Undo”  option is provided at the bottom.
+An “Hint” option is available at any stage in exercises.
+Finally answer needs to be entered.
+

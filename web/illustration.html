@@ -5,15 +5,16 @@
 		<meta name="description" content="website description">
 		<meta name="keywords" content="website keywords, website keywords">
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<link rel="stylesheet" type="text/css" href="css/style.css">
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <script src="speak.js"></script>
 		<!-- modernizr enables HTML5 elements and feature detects -->
 		<script type="text/javascript" src="js/modernizr-1.5.min.js">
-		</script>
+        </script>
 	</head>
 
 
 	<body onload="draw_canvas()">
-	
+
 		<div id="container">
 			<img src="images/sun.png" alt="sunshine"><div id="main">
 				<header><div id="logo">
@@ -21,7 +22,7 @@
 
 
 						<!-- LOGO HERE -->
-						
+
 						<h1><a href="index.html">Arithmetic Animator</a></h1>
 						<!-- LOGO End HERE -->
 
@@ -29,109 +30,143 @@
 						<h2>Learn. Play. Innovate.</h2>
 
 					</div>
-					
+
 				</div>
 
 				<!--				Menu Bar   -->
 				<script type="text/javascript">
 					function Fsubmit(row,col)
-					{
-						sessionStorage.column = col;
-						sessionStorage.row = row;
-						window.location = "./../web/illustration.html";
-					}
-				</script>
+{
+	sessionStorage.column = col;
+	sessionStorage.row = row;
+	window.location = "./../web/illustration.html";
+}
+function Fsubmit2(row,col)
+{
+	sessionStorage.column_ex = col;
+	sessionStorage.row_ex = row;
+	window.location = "./../web/exercise.html";
+}
+</script>
 
-				<nav><ul class="sf-menu" id="nav">
-					<li><a href="index.html">Home</a></li>
+<nav><ul class="sf-menu" id="nav">
+	<li><a href="index.html">Home</a></li>
+		<li><a href="select.html">Select</a></li>
+	<li><a href="gallery.html">Image Gallery</a></li>
+	<li>
+	<a href="illustration_select.html">Illustrations</a>
+	<ul>
+		<li>
+		<a href="illustration_select.html">Level 1</a>
+		<ul>
+			<li><a onclick= "Fsubmit(6, 8)" >6 x 8</a></li>
+			<li><a onclick= "Fsubmit(6, 9)" >6 x 9</a></li>
+			<li><a onclick= "Fsubmit(7, 8)" >7 x 8</a></li>
+			<li><a onclick= "Fsubmit(9, 7)" >9 x 7</a></li>
+			<li><a onclick= "Fsubmit(9, 8)" >9 x 8</a></li>
+			<li><a onclick= "Fsubmit(8, 8)" >8 x 8</a></li>
+		</ul>
+		</li>
+	</ul>
+	</li>
 
-					<li>
-					<a href="select.html">Illustrations</a>
-					<ul>
-						<li>
-						<a href="select.html">Level 1</a>
-						<ul>
-					<li><a onclick= "Fsubmit(8, 7)" >8 x 7</a></li>
-					<li><a onclick= "Fsubmit(8, 6)" >8 x 6</a></li>
-					<li><a onclick= "Fsubmit(9, 6)" >9 x 6</a></li>
-					<li><a onclick= "Fsubmit(8, 9)" >8 x 9</a></li>
-						</ul>
-						</li>
-					</ul>
-					</li>
-
-
-
-				</ul></nav></header>
-
-				<!--				Menu Bar Ends  -->
-
-				<div id="site_content">
-
-
-				<!-- SIDE BAR START -->
-				<!--
-					<div id="sidebar_container">
-						<div class="sidebar">
-							<h4>New Website Launched</h4>
-							<h5>January 1st, 2012</h5>
-							<p>2012 sees the redesign of our website. Let us know what you think..... <a href="#">read more</a></p>
-						</div>
-						<div class="sidebar">
-							<h4>20% Discount</h4>
-							<p>For the month of March 2012, we are offering a 20% discount for all new customers.</p>
-						</div>
-						<div class="sidebar">
-							<h4>Contact Us</h4>
-							<p>We'd love to hear from you. Call us, <a href="#">email us</a> or complete our <a href="contact.php">contact form</a>.</p>
-						</div>
-					</div>
-					-->
-
-					<!-- SIDE BAR END -->
-
-					<!-- MAIN PAGE -->
-
-					<div id="content">
-						<h1> Illustration </h1>
-
-						<div id="area">
-
-							<div id="instructions">
-
-								<p id="step0" style= "display:none">Steps-</p>
-								<p id="step1" style= "display:none">1. Matrix Is Filled With Animated Butterflies</p>
-								<p id="step2" style= "display:none"></p>
-								<p id="step3" style= "display:none"></p>
-								<p id="step4" style= "display:none"></p>
-
-							</div>
-							<div id="canvasArea">
-								<canvas id ="myCanvas" width =600 height =600>
-								Your browser does not support canvas tag.
-								</canvas>
-							</div>
+	<li>
+	<a href="select_exercise.html">Exercises</a>
+	<ul>
+		<li>
+		<a href="select_exercise.html">Level 1</a>
+		<ul>
+			<li><a onclick= "Fsubmit2(8, 6)" >8 x 6</a></li>
+			<li><a onclick= "Fsubmit2(9, 6)" >9 x 6</a></li>
+			<li><a onclick= "Fsubmit2(8, 7)" >8 x 7</a></li>
+			<li><a onclick= "Fsubmit2(7, 9)" >7 x 9</a></li>
+			<li><a onclick= "Fsubmit2(9, 9)" >9 x 9</a></li>
+			<li><a onclick= "Fsubmit2(8, 9)" >8 x 9</a></li>
+		</ul>
+		</li>
+	</ul>
+	</li>
 
 
-						</div>
+</ul></nav></header>
 
-						<img id="b0"  style="display:none" src="images/butterfly1.png" >
+<!--				Menu Bar Ends  -->
 
-						<img id="b1" style="display:none" src="images/butterfly2.png" >
-
-						<img id="b2" style="display:none" src="images/butterfly3.png" >
-
-						<img id="b3" style="display:none" src="images/butterfly4.png" >
-						</br>
-						
-						<button class="myButton" id="next"  onclick = "next()"> Next </button>
-						<button class="myButton" id= "prev"  onclick = "prev()"> Undo </button>
+<div id="site_content">
 
 
-					</div>
-				</div>
+	<!-- SIDE BAR START -->
+	<!--
+	<div id="sidebar_container">
+		<div class="sidebar">
+			<h4>New Website Launched</h4>
+			<h5>January 1st, 2012</h5>
+			<p>2012 sees the redesign of our website. Let us know what you think..... <a href="#">read more</a></p>
+		</div>
+		<div class="sidebar">
+			<h4>20% Discount</h4>
+			<p>For the month of March 2012, we are offering a 20% discount for all new customers.</p>
+		</div>
+		<div class="sidebar">
+			<h4>Contact Us</h4>
+			<p>We'd love to hear from you. Call us, <a href="#">email us</a> or complete our <a href="contact.php">contact form</a>.</p>
+		</div>
+	</div>
+	-->
 
-				<!-- MAIN PAGE ENDS-->
+	<!-- SIDE BAR END -->
+
+	<!-- MAIN PAGE -->
+
+	<div id="content">
+		<h1 id="head"> Illustration </h1>
+
+
+		<div id="instructions">
+        <div id="audio"> </div>
+			<p id="step0" style= "display:none">Steps-</p>
+			<p id="step1" style= "display:none">1. Matrix Is Filled With Animated Butterflies</p>
+			<p id="step2" style= "display:none"></p>
+			<p id="step3" style= "display:none"></p>
+			<p id="step4" style= "display:none"></p>
+
+		</div>
+
+		<div id="canvasArea">
+			<canvas id ="myCanvas" width =600 height =600 >
+			Your browser does not support canvas tag.
+			</canvas>
+		</div>
+
+
+
+		<img id="b0"  style="display:none" src="images/butterfly1.png" >
+
+		<img id="b1" style="display:none" src="images/butterfly2.png" >
+
+		<img id="b2" style="display:none" src="images/butterfly3.png" >
+
+		<img id="b3" style="display:none" src="images/butterfly4.png" >
+		</br>
+
+		<button class="myButton" id="next"  onclick = "next()"> Next </button>
+		<button class="myButton" id= "prev"  onclick = "prev()"> Undo </button>
+		<button class="myButton" id="text"  onclick = "text()">Turn Text Off </button>
+		<button class="myButton" id="speech"  onclick = "speech()">Turn Speech Off</button>
+
+		</br>
+		</br>
+		<p>
+		Text Language :
+		<input type="radio" name="lang" value="1" checked="checked" onclick="language(1)"> English
+		<input type="radio" name="lang" value="2" onclick="language(2)"> Telugu
+		</p>
+
+
+	</div>
+</div>
+
+<!-- MAIN PAGE ENDS-->
 
 
 
@@ -146,15 +181,15 @@
 
 		<script type="text/javascript" src="js/TypingText.js"></script>
 		<script type="text/javascript" src="js/animate.js"></script>
-		
+
 		<script type="text/javascript" src="js/jquery.js"></script>
 		<script type="text/javascript" src="js/jquery.easing-sooper.js"></script>
 		<script type="text/javascript" src="js/jquery.sooperfish.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function() {
 					$('ul.sf-menu').sooperfish();
 					});
-				</script>
+</script>
 			</body>
 		</html>

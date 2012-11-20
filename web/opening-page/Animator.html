@@ -1,29 +1,78 @@
 <!DOCTYPE html>
-<html style="height:100%;">
-<script type= 'text/javascript'>
-window.onload = function()
-{
-    setTimeout("top.location.href = './../select.html'", 8000);
-}
-    
-</script>
+<html>
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-	<title>Untitled</title>
+	<title>Arithmetic Animator</title>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!--Adobe Edge Runtime-->
-    <script type="text/javascript" charset="utf-8" src="Animator_edgePreload.js"></script>
+    <script type="text/javascript" charset="utf-8" src="wordAnimation2c_edgePreload.js"></script>
     <style>
-        .edgeLoad-EDGE-12656025 { visibility:hidden; }
+        .edgeLoad-EDGE-26835172 { visibility:hidden; }
     </style>
 <!--Adobe Edge Runtime End-->
 
-</head>
+<script type= 'text/javascript'>
+window.onload = function()
+{
+document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    if (evt.keyCode == 27) {
+			setTimeout("top.location.href = './../select.html'", 1);
 
+		}
+};
+setTimeout("top.location.href = './../select.html'", 15000);
+}
+    
+</script>
 
+<style>
+html,body{
+    height:100%;
+    margin:0;
+    padding:0;
+}
+body{
+    background:#000;/* match background color of animation*/
+    text-align:center;
+    min-width:900px;
+    min-height:600px;
+}
+.content {
+          position:absolute;
+    top:50%;
+    left:50%;
+    margin-top:-300px;/* half stage height*/
+    margin-left:-450px;/* half stage width*/
+    width:900px;
+    height:600px;
+    overflow:hidden;
+}
+ 
+ 
+</style>
 
-<body style="margin:0;padding:0;height:100%;">
-	<div id="Stage" class="EDGE-12656025">
-    </div>
+</head><body>
+<div class="content">
+          <div id="stage" class="symbol_stage EDGE-26835172">
+          </div>
 </body>
 </html>

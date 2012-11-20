@@ -1,6 +1,180 @@
+//Browser check
+var isOpera = !!(window.opera && window.opera.version);  // Opera 8.0+
+var isFirefox = testCSS('MozBoxSizing');                 // FF 0.8+
+var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+    // At least Safari 3+: "[object HTMLElementConstructor]"
+var isChrome = !isSafari && testCSS('WebkitTransform');  // Chrome 1+
+var isIE = /*@cc_on!@*/false || testCSS('msTransform');  // At least IE6
+
+function testCSS(prop) {
+    return prop in document.documentElement.style;
+}
+
+sVar = 2;
+
+if(isFirefox == true)
+{
+    sVar = 0;
+}
+
+else
+{
+	isFirefox = false;
+	sp_bttn=document.getElementById('speech');
+	sp_bttn.setAttribute( "class", "myButton2");
+	sp_bttn.disabled=true;
+}
+//text
+
+write = 0; 
+function text()
+{
+	if(write == 0)
+	{
+		write = 1;
+		wr_bttn=document.getElementById('text');
+		wr_bttn.innerHTML = ("Turn Text On");
+		wr_bttn.setAttribute( "class", "myButton2");
+	}
+	else
+	{
+		write = 0;
+		wr_bttn=document.getElementById('text');
+		wr_bttn.innerHTML = ("Turn Text Off");
+		wr_bttn.setAttribute( "class", "myButton");
+	}
+}
+function speech()
+{
+	if(sVar == 0)
+	{
+		sVar = 1;
+		sp_bttn=document.getElementById('speech');
+		sp_bttn.innerHTML = ("Turn Speech On");
+		sp_bttn.setAttribute( "class", "myButton2");
+		isFirefox = false;
+	}
+	else if(sVar == 1)
+	{
+		sVar = 0;
+		sp_bttn=document.getElementById('speech');
+		sp_bttn.setAttribute( "class", "myButton2");
+		sp_bttn.innerHTML = ("Turn Speech Off");
+		sp_bttn.setAttribute( "class", "myButton");
+		isFirefox = true;
+	}
+}
+
+/*JavaScript speak.js library file appended to the main function */
+var speakWorker;
+try {
+  speakWorker = new Worker('js/speakWorker.js');
+} catch(e) {
+  console.log('speak.js warning: no worker support');
+}
+
+function speak(text, args) {
+  var PROFILE = 1;
+
+  function parseWav(wav) {
+    function readInt(i, bytes) {
+      var ret = 0;
+      var shft = 0;
+      while (bytes) {
+        ret += wav[i] << shft;
+        shft += 8;
+        i++;
+        bytes--;
+      }
+      return ret;
+    }
+    if (readInt(20, 2) != 1) throw 'Invalid compression code, not PCM';
+    if (readInt(22, 2) != 1) throw 'Invalid number of channels, not 1';
+    return {
+      sampleRate: readInt(24, 4),
+      bitsPerSample: readInt(34, 2),
+      samples: wav.subarray(44)
+    };
+  }
+
+  function playHTMLAudioElement(wav) {
+    function encode64(data) {
+      var BASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+      var PAD = '=';
+      var ret = '';
+      var leftchar = 0;
+      var leftbits = 0;
+      for (var i = 0; i < data.length; i++) {
+        leftchar = (leftchar << 8) | data[i];
+        leftbits += 8;
+        while (leftbits >= 6) {
+          var curr = (leftchar >> (leftbits-6)) & 0x3f;
+          leftbits -= 6;
+          ret += BASE[curr];
+        }
+      }
+      if (leftbits == 2) {
+        ret += BASE[(leftchar&3) << 4];
+        ret += PAD + PAD;
+      } else if (leftbits == 4) {
+        ret += BASE[(leftchar&0xf) << 2];
+        ret += PAD;
+      }
+      return ret;
+    }
+
+    document.getElementById("audio").innerHTML=("<audio id=\"player\" src=\"data:audio/x-wav;base64,"+encode64(wav)+"\">");
+    document.getElementById("player").play();
+  }
+
+  function playAudioDataAPI(data) {
+    try {
+      var output = new Audio();
+      output.mozSetup(1, data.sampleRate);
+      var num = data.samples.length;
+      var buffer = data.samples;
+      var f32Buffer = new Float32Array(num);
+      for (var i = 0; i < num; i++) {
+        var value = buffer[i<<1] + (buffer[(i<<1)+1]<<8);
+        if (value >= 0x8000) value |= ~0x7FFF;
+        f32Buffer[i] = value / 0x8000;
+      }
+      output.mozWriteAudio(f32Buffer);
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  function handleWav(wav) {
+    var startTime = Date.now();
+    var data = parseWav(wav); // validate the data and parse it
+    // TODO: try playAudioDataAPI(data), and fallback if failed
+    playHTMLAudioElement(wav);
+    if (PROFILE) console.log('speak.js: wav processing took ' + (Date.now()-startTime).toFixed(2) + ' ms');
+  }
+
+  if (args && args.noWorker) {
+    // Do everything right now. speakGenerator.js must have been loaded.
+    var startTime = Date.now();
+    var wav = generateSpeech(text, args);
+    if (PROFILE) console.log('speak.js: processing took ' + (Date.now()-startTime).toFixed(2) + ' ms');
+    handleWav(wav);
+  } else {
+    // Call the worker, which will return a wav that we then play
+    var startTime = Date.now();
+    speakWorker.onmessage = function(event) {
+      if (PROFILE) console.log('speak.js: worker processing took ' + (Date.now()-startTime).toFixed(2) + ' ms');
+      handleWav(event.data);
+    };
+    speakWorker.postMessage({ text: text, args: args });
+  }
+}
+/*********************************************************************/	
+
 /*********************** GLOBAL VARIABLES ***************************/
 
-var n, m, flag=0;
+var n, m, flag=0, extra;
 // width, height of canvas
 var width, height, factor=0.9; 
 
@@ -24,7 +198,7 @@ for(i=0; i<=cells; i++)
 	tnew[i]=new Array(cells+1);
 	occupied[i]=new Array(cells+1);
 }
-var state;
+var state, langflag=1;
 
 /********************************************************************/
 
@@ -35,7 +209,6 @@ function draw_canvas()
 	window.addEventListener('orientationchange', resize, false);
 	document.getElementById('next').disabled = false; 
 
-	c.addEventListener('mousemove', mouse_enter , false);	// Not doing anything with it now
 
 	state=0;
 	n=window.sessionStorage.column;
@@ -45,6 +218,10 @@ function draw_canvas()
 	m=parseInt(m);
 	if(n>m)
 		flag=1;
+	if(flag==0)
+		extra=cells-m;
+	else
+		extra=cells-n;
 
 	win_width=(window.innerWidth);
 	win_height=(window.innerHeight);
@@ -75,24 +252,8 @@ function draw_canvas()
 		for(j=0; j<cells+1; j++)
 			occupied[i][j]=0;
 	}
-}
-function mouse_enter(evt)
-{
-	var mousePos = getMousePos(c, evt);
-	var message = "Mouse position: " + mousePos.x + "," + mousePos.y;
-}
-function getMousePos(canvas, evt) 
-{
-	var rect = canvas.getBoundingClientRect(), root = document.documentElement;
-	// return relative mouse position
-	var mouseX = evt.clientX - rect.top - root.scrollTop;
-	var mouseY = evt.clientY - rect.left - root.scrollLeft;
-	mouseX=Math.floor(mouseX/cell_width);
-	mouseY=Math.floor(mouseY/cell_width);
-	return {
-		x: mouseX,
-			y: mouseY
-	};
+	document.getElementById("head").innerHTML= "Illustration - "+m+" X "+n;
+
 }
 function write_index()
 {
@@ -108,7 +269,7 @@ function write_index()
 function draw_matrix_lines()
 {
 	var x;
-	for(x=cell_width; x <= width; x+=cell_width)
+	for(x=cell_width; x <= width+2; x+=cell_width)
 	{
 		ctx.moveTo(x, cell_width);
 		ctx.lineTo(x, width);
@@ -144,10 +305,7 @@ function resize()
 function next()
 {
 	state++;
-	if(flag==0)
-		extra=cells-m;
-	else
-		extra=cells-n;
+
 	if(state==0)
 	{
 		bttn=document.getElementById('next');
@@ -168,8 +326,23 @@ function next()
 		str="step0";
 		txt=document.getElementById(str);
 		txt.setAttribute("style", "display:block");
+		say = "One.  Matrix is Filled With Animated "+sessionStorage.name+"s";
 
-		type("step1");
+		if(langflag==1)
+			document.getElementById('step1').innerHTML="1. Matrix is Filled With Animated "+sessionStorage.name+"s";
+		
+		else
+			document.getElementById('step1').innerHTML="1.మాట్రిక్స్ యానిమేటెడ్ స్తువులతో  నింపుతారు.";
+
+		if(isFirefox == true)
+ 		{
+         		  speak(say,{amplitude : 75, pitch : 125, speed :125, wordgap : 1});
+        	}
+		if(write==0)
+		{
+			type("step1");
+		}
+
 
 	}
 	else if(state==2)
@@ -178,11 +351,40 @@ function next()
 		bttn.setAttribute( "class", "myButton");
 		bttn.disabled=false;
 		if(flag==0)
-			document.getElementById('step2').innerHTML="2. No of objects in a Row is "+m+".</br>Since it is just "+(cells-m)+" short of a 'Ten', let us shift objects in the last "+(cells-m)+" columns into the columns on the right of the original "+m+" columns.";
-		else
-			document.getElementById('step2').innerHTML="2. No of objects in a Column is "+n+".</br>Since it is just "+(cells-n)+" short of a 'Ten', let us shift objects in the last "+(cells-n)+" columns into the rows below the original "+n+" rows.";
-		type("step2");
+		{
+			if(langflag==1)
+				document.getElementById('step2').innerHTML="2. No of objects in a Row are "+m+".</br>Since it is just "+(cells-m)+" short of a 'Ten', let us shift objects in the last "+(cells-m)+" columns into the columns on the right of the original "+m+" columns.";
+			else
+				document.getElementById('step2').innerHTML="2. వరుసలో  "+m+"వస్తువులు ఉన్నాయి..</br> అది 'పదికి ' కేవలం "+(cells-m)+" తక్కువ కనుక, చివర "+(cells-m)+" కాలమ్ల  వస్తువులను, "+m+" కాలమ్ల యొక్క  క్రిందకి  వాటిని తరలించండి. ";
+			say="2. Number of objects in a Row are "+m+". Since it is just "+(cells-m)+" short of a 'Ten', let us shift objects in the last "+(cells-m)+" columns into the columns on the right of the original "+m+" columns.";
 
+			if(isFirefox == true)
+			{
+				speak(say,{amplitude : 75, pitch : 125, speed :125, wordgap : 1});
+			}
+			if(write == 0)
+			{
+				type("step2");
+			}
+		}
+		else
+		{
+			if(langflag==1)
+				document.getElementById('step2').innerHTML="2. No of objects in a Column is "+n+".</br>Since it is just "+(cells-n)+" short of a 'Ten', let us shift objects in the last "+(cells-n)+" columns into the rows below the original "+n+" rows.";
+			else
+				document.getElementById('step2').innerHTML="2. కాలమ్ లో  " +n+ " వస్తువులు ఉన్నాయి.. </br> అది 'పదికి ' కేవలం"+(cells-n)+" తక్కువ కనుక, చివర "+(cells-n)+" వరుసల వస్తువులను, "+n+" కాలమ్ల యొక్క కుడివైపు  వాటిని తరలించండి.";
+			say="2. Number of objects in a Column are "+n+". Since it is just "+(cells-n)+" short of a 'Ten', let us shift objects in the last "+(cells-n)+" columns into the rows below the original "+n+" rows.";
+			if(isFirefox == true)
+			{
+				speak(say,{amplitude : 35, pitch : 140, speed : 135,  wordgap : 5});
+			}
+			if(write == 0)
+			{
+				type("step2");
+			}
+		}
+
+        
 	}
 	else if(state>=3 && state < 3+extra)
 	{
@@ -203,24 +405,128 @@ function next()
 		bttn.disabled=false;
 		highlight();
 		if(flag==0)
-			document.getElementById('step3').innerHTML="3. The "+Math.floor(m*n/cells)+" rows of Butterflies in Red Add Upto "+Math.floor(m*n/cells)*cells+".";
+		{
+			if(langflag==1)
+				document.getElementById('step3').innerHTML="3. The "+Math.floor(m*n/cells)+" rows of "+sessionStorage.name+"s"+" in Red Add Upto "+Math.floor(m*n/cells)*cells+".";
+			else
+				document.getElementById('step3').innerHTML="3. "+Math.floor(m*n/cells)+" వరుసల ఎరుపు  వస్తువుల  యొక్క మొత్తం విలువ "+Math.floor(m*n/cells)*cells;
+			say="3. The "+Math.floor(m*n/cells)+" rows of "+sessionStorage.name+"s"+" in Red Add Upto "+Math.floor(m*n/cells)*cells+".";
+			if(isFirefox == true)
+			{
+				speak(say,{amplitude : 35, pitch : 140, speed : 135,  wordgap : 5});
+			}
+			if(write == 0)
+			{
+				type("step3");
+			}
+		}
 		else
-			document.getElementById('step3').innerHTML="3. The "+Math.floor(m*n/cells)+" columns of Butterflies in Red Add Upto "+Math.floor(m*n/cells)*cells+".";
-
-		type("step3");
+		{
+			if(langflag==1)
+				document.getElementById('step3').innerHTML="3. The "+Math.floor(m*n/cells)+" columns of "+sessionStorage.name+"s"+" in Red Add Upto "+Math.floor(m*n/cells)*cells+".";
+			else
+				document.getElementById('step3').innerHTML="3. "+Math.floor(m*n/cells)+" కాలమ్ల  ఎరుపు వస్తువుల    యొక్క మొత్తం విలువ"+Math.floor(m*n/cells)*cells+".";
+			say="3. The "+Math.floor(m*n/cells)+" columns of "+sessionStorage.name+"s"+" in Red Add Upto "+Math.floor(m*n/cells)*cells+".";
+			if(isFirefox == true)
+			{
+				speak(say,{amplitude : 35, pitch : 140, speed : 135,  wordgap : 5});
+			}
+			if(write == 0)
+			{
+				type("step3");
+			}
+		}
 	}
+
 	else if(state==4+extra)
 	{
 		highlight_rem();
-		document.getElementById('step4').innerHTML="4. The Remaining Butterflies in Blue add Upto "+(m*n)%cells+"</br></br>"+"So, The ANSWER of "+m+"x"+n+" is "+m*n+".";
+		if(langflag==1)
+			document.getElementById('step4').innerHTML="4. The Remaining "+sessionStorage.name+"s"+" in Blue add Upto "+(m*n)%cells+"</br></br>"+"So, The ANSWER of "+m+"x"+n+" is "+m*n+".";
+		else
+			document.getElementById('step4').innerHTML="4. మిగిలిన నీలం  వస్తువుల యొక్క మొత్తం విలువ "+(m*n)%cells+". </br></br> కాబట్టి,  "+m+"x"+n+" యొక్క సమాధానం "+m*n+".";
+		say="4. The Remaining "+sessionStorage.name+"s"+" in Blue add Upto "+(m*n)%cells +"So, The ANSWER of "+m+"multiplied by "+n+" is "+m*n+".";
 		bttn=document.getElementById('next');
 		bttn.setAttribute( "class", "myButton2");
 		bttn.disabled=true;
+		if(isFirefox == true)
+        {
+        speak(say,{amplitude : 35, pitch : 140, speed : 135,  wordgap : 5});
+        }
+	if(write == 0)
+	{
 		type("step4");
+	}
 	}
 	else if(state==5+extra)
 		state = 4+extra;
 }
+function language(num)
+{
+	if(num==1)
+		langflag=1;
+	else
+		langflag=-1;
+	if(langflag==-1)
+	{
+		if(state>=1)
+			document.getElementById('step1').innerHTML="1.మాట్రిక్స్ యానిమేటెడ్ స్తువులతో  నింపుతారు.";
+		if(state>=2)
+		{
+			if(flag==0)
+				document.getElementById('step2').innerHTML="2. వరుసలో  "+m+"వస్తువులు ఉన్నాయి..</br> అది 'పదికి ' కేవలం "+(cells-m)+" తక్కువ కనుక, చివర "+(cells-m)+" కాలమ్ల  వస్తువులను, "+m+" కాలమ్ల యొక్క  క్రిందకి  వాటిని తరలించండి. ";
+			else
+				document.getElementById('step2').innerHTML="2. కాలమ్ లో  " +n+ " వస్తువులు ఉన్నాయి.. </br> అది 'పదికి ' కేవలం"+(cells-n)+" తక్కువ కనుక, చివర "+(cells-n)+" వరుసల వస్తువులను, "+n+" కాలమ్ల యొక్క కుడివైపు  వాటిని తరలించండి.";
+
+		}
+		if(state>=3+extra)
+		{
+			if(flag==0)
+				document.getElementById('step3').innerHTML="3. "+Math.floor(m*n/cells)+" వరుసల ఎరుపు  వస్తువుల  యొక్క మొత్తం విలువ "+Math.floor(m*n/cells)*cells;
+			else
+				document.getElementById('step3').innerHTML="3. "+Math.floor(m*n/cells)+" కాలమ్ల  ఎరుపు వస్తువుల    యొక్క మొత్తం విలువ"+Math.floor(m*n/cells)*cells+".";
+
+
+		}
+		if(state>=4+extra)
+		{
+			document.getElementById('step4').innerHTML="4. మిగిలిన నీలం  వస్తువుల యొక్క మొత్తం విలువ "+(m*n)%cells+". </br></br> కాబట్టి,  "+m+"x"+n+" యొక్క సమాధానం "+m*n+".";
+		}
+
+
+	}
+	else
+	{
+		if(state>=1)
+			document.getElementById('step1').innerHTML="1. Matrix is Filled With Animated "+sessionStorage.name+"s";
+		if(state>=2)
+		{
+			if(flag==0)
+				document.getElementById('step2').innerHTML="2. No of objects in a Row are "+m+".</br>Since it is just "+(cells-m)+" short of a 'Ten', let us shift objects in the last "+(cells-m)+" columns into the columns on the right of the original "+m+" columns.";
+			else
+				document.getElementById('step2').innerHTML="2. No of objects in a Column is "+n+".</br>Since it is just "+(cells-n)+" short of a 'Ten', let us shift objects in the last "+(cells-n)+" columns into the rows below the original "+n+" rows.";
+
+		}
+		if(state>=3+extra)
+		{
+			if(flag==0)
+				document.getElementById('step3').innerHTML="3. The "+Math.floor(m*n/cells)+" rows of "+sessionStorage.name+"s"+" in Red Add Upto "+Math.floor(m*n/cells)*cells+".";
+			else
+				document.getElementById('step3').innerHTML="3. The "+Math.floor(m*n/cells)+" columns of "+sessionStorage.name+"s"+" in Red Add Upto "+Math.floor(m*n/cells)*cells+".";
+
+
+		}
+		if(state>=4+extra)
+		{
+			document.getElementById('step4').innerHTML="4. The Remaining "+sessionStorage.name+"s"+" in Blue add Upto "+(m*n)%cells+"</br></br>"+"So, The ANSWER of "+m+"x"+n+" is "+m*n+".";
+		}
+
+
+
+	}
+
+}
+
 function type(str)
 {
 	txt=document.getElementById(str);
@@ -273,7 +579,7 @@ function prev()
 		txt=document.getElementById("step3");
 		txt.setAttribute("style", "display:none");
 	}
-	else if(state==4 + extra)
+	else if(state==4+extra)
 	{
 		unhighlight_rem();
 		txt=document.getElementById("step4");
@@ -411,13 +717,20 @@ function butterfly_matrix(n, m, color)
 function draw_butterfly(x, y, color)
 {
 	var butterfly =new Array();
-	butterfly[0]= document.getElementById("b0");
+	var za;
+	for(za=0;za<(window.sessionStorage.num);za++)
+	{
+		butterfly[za]= new Image();
+		butterfly[za].src='./image_library/'+ (window.sessionStorage.name) + (za+0)+'.gif';
+	}
+	flap(butterfly, flap_speed , 0, x , y, color);
+/*	butterfly[0]= document.getElementById("b0");
 	butterfly[1]= document.getElementById("b1");
 	butterfly[2]= document.getElementById("b2");
 	butterfly[3]= document.getElementById("b3");
-	flap(butterfly, flap_speed , 0, x , y, color);
+	*/
 
-}
+} 
 /***************************************/
 
 // For more speed of flapping wings, put wait value less.
@@ -438,7 +751,7 @@ function flap(butterfly, wait, counter, x, y, color)
 	ctx.drawImage(butterfly[counter], x*cell_width+offset, y*cell_width+offset, bsize, bsize );
 
 	// call function again after 'wait' ms
-	t[x][y]=setTimeout(function(){flap(butterfly,wait, (counter+1)%4, x, y, color)} , wait);
+	t[x][y]=setTimeout(function(){flap(butterfly,wait, (counter+1)%(window.sessionStorage.num), x, y, color)} , wait);
 	occupied[x][y]=1;
 }
 
@@ -451,7 +764,9 @@ function transpose(i)
 		count++;
 	}
 	for(k=0; k<m-count; k++)
+	{
 		translation(m-count-k, n-i, cells-i, m-k);
+	}
 }
 function transpose_c(i)
 {
@@ -470,12 +785,20 @@ function transpose_c(i)
 
 function untranspose(i)
 {
+	
 	var butterfly =new Array();
+	var za;
+	for(za=0;za<(window.sessionStorage.num);za++)
+	{
+		butterfly[za]= new Image();
+		butterfly[za].src='./image_library/'+window.sessionStorage.name+ (za+0)+'.gif';
+	}
+/*	var butterfly =new Array();
 	// getting butterfly images
 	butterfly[0]= document.getElementById("b0");
 	butterfly[1]= document.getElementById("b1");
 	butterfly[2]= document.getElementById("b2");
-	butterfly[3]= document.getElementById("b3");
+	butterfly[3]= document.getElementById("b3");*/
 
 	for(j=m; j>0; j--)
 	{
@@ -494,12 +817,20 @@ function untranspose(i)
 }
 function untranspose_c(i)
 {
-	var butterfly =new Array();
+/*	var butterfly =new Array();
 	// getting butterfly images
 	butterfly[0]= document.getElementById("b0");
 	butterfly[1]= document.getElementById("b1");
 	butterfly[2]= document.getElementById("b2");
-	butterfly[3]= document.getElementById("b3");
+	butterfly[3]= document.getElementById("b3");*/
+
+	var butterfly =new Array();
+	var za;
+	for(za=0;za<window.sessionStorage.num;za++)
+	{
+		butterfly[za]= new Image();
+		butterfly[za].src='./image_library/'+ window.sessionStorage.name + (za+0)+'.gif';
+	}
 
 	for(j=n; j>0; j--)
 	{
@@ -518,17 +849,25 @@ function untranspose_c(i)
 
 function translation(i, j, x, y)
 {
-	console.log(i, j, x, y);
 	clearTimeout(t[i][j]);
 
 	occupied[i][j]=0;
-
 	var butterfly =new Array();
+	var za;
+	for(za=0;za<window.sessionStorage.num;za++)
+	{
+		butterfly[za]= new Image();
+		butterfly[za].src='./image_library/'+ window.sessionStorage.name + (za+0)+'.gif';
+	}
+
+/*	var butterfly =new Array();
 	// getting butterfly images
 	butterfly[0]= document.getElementById("b0");
 	butterfly[1]= document.getElementById("b1");
 	butterfly[2]= document.getElementById("b2");
-	butterfly[3]= document.getElementById("b3");
+	butterfly[3]= document.getElementById("b3");*/
+
+	
 	if(flag==0)
 		flap_to(butterfly, flap_speed-30, 0, i*cell_width, j*cell_width, x*cell_width, y*cell_width, i, j, x, y);
 	else
@@ -537,12 +876,12 @@ function translation(i, j, x, y)
 }
 function flap_to_c(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 {
-	xint=Math.floor(x/cell_width);
-	yint=Math.floor(y/cell_width);
+	xint=Math.floor(x/(cell_width-1));
+	yint=Math.floor(y/(cell_width-1));
 	offset = (cell_width - bsize)/2;
 	if( xint ==xx && yint==yy && ((xnew-x)<speed && (x-xnew)<speed) )
 	{
-		t[xx][yy]=setTimeout(function(){flap(butterfly,flap_speed, (counter+1)%4, xx, yy, "green")} , wait);
+		t[xx][yy]=setTimeout(function(){flap(butterfly,flap_speed, (counter+1)%(window.sessionStorage.num), xx, yy, "green")} , wait);
 		occupied[xx][yy]=1;
 		if(j==1)
 		{
@@ -560,7 +899,7 @@ function flap_to_c(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 		//			ctx.globalAlpha=1;
 		ctx.drawImage(butterfly[counter], x+offset, y+offset, bsize, bsize );
 		ctx.stroke();
-		tnew[i][j]=setTimeout(function(){flap_to_c(butterfly,wait, (counter+1)%4, x, y+speed, xnew, ynew, i, j, xx, yy)} , wait);
+		tnew[i][j]=setTimeout(function(){flap_to_c(butterfly,wait, (counter+1)%(window.sessionStorage.num), x, y+speed, xnew, ynew, i, j, xx, yy)} , wait);
 	}
 	else
 	{
@@ -577,7 +916,7 @@ function flap_to_c(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 			//		ctx.globalAlpha=1;
 			ctx.drawImage(butterfly[counter], x+offset, y+offset, bsize, bsize );
 			ctx.stroke();
-			tnew[i][j]=setTimeout(function(){flap_to_c(butterfly,wait, (counter+1)%4, x+speed, y, xnew, ynew, i, j, xx, yy)} , wait);
+			tnew[i][j]=setTimeout(function(){flap_to_c(butterfly,wait, (counter+1)%(window.sessionStorage.num), x+speed, y, xnew, ynew, i, j, xx, yy)} , wait);
 
 		}
 		else if(x>xnew)
@@ -589,7 +928,7 @@ function flap_to_c(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 			//		ctx.globalAlpha=1;
 			ctx.drawImage(butterfly[counter], x+offset, y+offset, bsize, bsize );
 			ctx.stroke();
-			tnew[i][j]=setTimeout(function(){flap_to_c(butterfly,wait, (counter+1)%4, x-speed, y, xnew, ynew, i, j, xx, yy)} , wait);
+			tnew[i][j]=setTimeout(function(){flap_to_c(butterfly,wait, (counter+1)%(window.sessionStorage.num), x-speed, y, xnew, ynew, i, j, xx, yy)} , wait);
 		}
 	}
 
@@ -597,17 +936,16 @@ function flap_to_c(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 
 function flap_to(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 {
-	xint=Math.floor(x/cell_width);
-	yint=Math.floor(y/cell_width);
-	if(i==1)
-		console.log("debug", xint, yint, xx, yy, y/cell_width, y);
+	xint=Math.floor(x/(cell_width-1));
+	yint=Math.floor(y/(cell_width-1));
 	offset = (cell_width - bsize)/2;
 	if( xint ==xx && yint==yy && ((ynew-y)<speed && (y-ynew)<speed) )
 //	if( xint ==xx && yint==yy )
 	{
-		t[xx][yy]=setTimeout(function(){flap(butterfly,flap_speed, (counter+1)%4, xx, yy, "green")} , wait);
-		occupied[xx][yy]=1;
+		t[xx][yy]=setTimeout(function(){flap(butterfly,flap_speed, (counter+1)%window.sessionStorage.num, xx, yy, "green")} , wait);
 		if(i==1)
+		if(i==1)
+		occupied[xx][yy]=1;
 		{
 			bttn=document.getElementById('next');
 			bttn.setAttribute( "class", "myButton");
@@ -629,7 +967,7 @@ function flap_to(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 		}
 		else if(row <=cells && (row-1)>=1 && occupied[row][j]==1 && occupied[row-1][j-1]==0)
 			ctx.clearRect((row-1)*cell_width, y, cell_width+speed, cell_width+speed);
-		tnew[i][j]=setTimeout(function(){flap_to(butterfly,wait, (counter+1)%4, x+speed, y, xnew, ynew, i, j, xx, yy)} , wait);
+		tnew[i][j]=setTimeout(function(){flap_to(butterfly,wait, (counter+1)%(window.sessionStorage.num), x+speed, y, xnew, ynew, i, j, xx, yy)} , wait);
 	}
 	else
 	{
@@ -646,7 +984,7 @@ function flap_to(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 			//		ctx.globalAlpha=1;
 			ctx.drawImage(butterfly[counter], x+offset, y+offset, bsize, bsize );
 			ctx.stroke();
-			tnew[i][j]=setTimeout(function(){flap_to(butterfly,wait, (counter+1)%4, x, y+speed, xnew, ynew, i, j, xx, yy)} , wait);
+			tnew[i][j]=setTimeout(function(){flap_to(butterfly,wait, (counter+1)%window.sessionStorage.num, x, y+speed, xnew, ynew, i, j, xx, yy)} , wait);
 
 		}
 		else if(y>ynew)
@@ -658,7 +996,7 @@ function flap_to(butterfly, wait, counter, x, y, xnew, ynew, i ,j, xx, yy)
 			//		ctx.globalAlpha=1;
 			ctx.drawImage(butterfly[counter], x+offset, y+offset, bsize, bsize );
 			ctx.stroke();
-			tnew[i][j]=setTimeout(function(){flap_to(butterfly,wait, (counter+1)%4, x, y-speed, xnew, ynew, i, j, xx, yy)} , wait);
+			tnew[i][j]=setTimeout(function(){flap_to(butterfly,wait, (counter+1)%(window.sessionStorage.num), x, y-speed, xnew, ynew, i, j, xx, yy)} , wait);
 		}
 	}
 }

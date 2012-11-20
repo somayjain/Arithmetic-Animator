@@ -1,6 +1,13 @@
 <html>
     <head>
-        <script type='text/javascript'>
+		<script type='text/javascript'>
+			sessionStorage.page=1;
+			sessionStorage.name="eagle";
+			sessionStorage.num=29;
+			sessionStorage.flag=0;
+			sessionStorage.row=6;
+			sessionStorage.column=8;
+
             window.location = './opening-page/Animator.html'
         </script>
     </head>
